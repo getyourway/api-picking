@@ -1,5 +1,6 @@
 import csv
 import requests
+from datetime import datetime
 
 class Keypad:
     def __init__(self, api_url):
@@ -8,7 +9,7 @@ class Keypad:
         self.selected_picking = None
 
     def fetch_pickings(self):
-        url = f"{self.api_url}/api/order_preparations"
+        url = f"{self.api_url}/api/picking"
         response = requests.get(url)
         if response.status_code == 200:
             self.pickings = response.json()
@@ -17,7 +18,7 @@ class Keypad:
             return None
 
     def select_picking(self, picking_id):
-        url = f"{self.api_url}/api/order_preparations/{picking_id}"
+        url = f"{self.api_url}/api/picking/{picking_id}"
         response = requests.get(url)
         if response.status_code == 200:
             self.selected_picking = response.json()
@@ -40,8 +41,8 @@ class Keypad:
                 "um",
                 "tot_needed",
                 "tot_issued",
-                "picked",
                 "picked_qty",
+                "picked_time",
             ]
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
             writer.writeheader()
@@ -49,21 +50,27 @@ class Keypad:
                 filtered_item = {k: v for k, v in item.items() if k in fieldnames}
                 writer.writerow(filtered_item)
 
-    def update_picking(self, picking_id, csv_file_path):
+    def update_picking(self, picking_id, csv_file_path, finish=False):
         order_items = []
         with open(csv_file_path, "r") as csvfile:
             reader = csv.DictReader(csvfile)
             for row in reader:
-                row['order_preparation_id'] = picking_id
-                row['picked'] = row['picked'].lower() == 'true'  # Convertir la chaîne en booléen
-                row['picked_qty'] = float(row['picked_qty'])
+                row["picking_order_id"] = picking_id
+                if row["picked_qty"] == "":
+                    row["picked_qty"] = None
+                elif row["picked_qty"] is not None:
+                    row["picked_qty"] = float(row["picked_qty"])
                 order_items.append(row)
-                
-        url = f"{self.api_url}/api/order_preparations/{picking_id}"
-        data = {"status": "finished", "order_items": order_items}
+
+        url = f"{self.api_url}/api/picking/{picking_id}"
+        data = {"id": picking_id, "order_items": order_items}
+        if finish:
+            data["status"] = "finished"
 
         response = requests.put(url, json=data)
         if response.status_code == 200:
+            self.selected_picking = response.json()
+            self.save_picking_to_csv()
             return {"status": "updated"}
         else:
             print(f"Error updating picking {picking_id}: {response.status_code}, {response.text}")
@@ -90,9 +97,16 @@ def main():
     else:
         print("Error selecting picking")
 
+    # Choose action
+    print("1 - Send modified picking")
+    print("2 - Finish picking")
+    action = None
+    while action not in ["1", "2"]:
+        action = input("Enter a valid action: ")
+
     # Update picking
     csv_file_path = f"keypad_local/picking_{picking_id}.csv"
-    updated_picking = keypad.update_picking(picking_id, csv_file_path)
+    updated_picking = keypad.update_picking(picking_id, csv_file_path, action == "2")
     if updated_picking:
         print(f"Picking {picking_id} updated")
     else:

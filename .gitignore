@@ -1,0 +1,12 @@
+# Python virtual env
+.venv
+venv
+
+# VS Code settings
+.vscode
+
+# Mac files
+.DS_STORE
+
+# Local Database instance
+instance/

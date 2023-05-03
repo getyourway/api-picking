@@ -1,0 +1,167 @@
+openapi: 3.0.0
+info:
+  title: API de gestion de pickings
+  version: 1.0.0
+paths:
+  /api/picking:
+    get:
+      summary: Retourne tous les pickings non terminées
+      responses:
+        200:
+          description: Retourne une liste de tous les pickings non terminées
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    status:
+                      type: string
+      tags:
+        - Picking
+    put:
+      summary: Met à jour le contenu d'un picking et retourne le picking dans son état complet après la mise à jour
+      parameters:
+        - name: order_id
+          in: path
+          required: true
+          description: ID du picking à mettre à jour
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                order_items:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      picked_qty:
+                        type: number
+                      picked_time:
+                        type: string
+                        format: date-time
+      responses:
+        200:
+          description: Retourne le picking dans son état complet après mis à jour
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PickingOrder'
+        400:
+          description: Le picking est déjà terminé ou certaines quantités n'ont pas été spécifiées
+        404:
+          description: Le picking n'a pas pu être trouvé
+      tags:
+        - Picking
+  /api/picking/{order_id}:
+    get:
+      summary: Retourne un picking spécifique sur base de son ID
+      parameters:
+        - name: order_id
+          in: path
+          required: true
+          description: ID du picking à retourner
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Retourne le picking avec l'ID spécifié
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PickingOrder'
+        404:
+          description: Le picking avec l'ID spécifié n'a pas été trouvé
+      tags:
+        - Picking
+components:
+  schemas:
+    PickingItem:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: ID de l'article
+          example: 1
+        location:
+          type: string
+          description: Emplacement de l'article
+          example: B0100107
+        item:
+          type: string
+          description: Code de l'article
+          example: 4004 118 48683
+        description:
+          type: string
+          description: Description de l'article
+          example: Chaise de toit SKF
+        totqty:
+          type: number
+          description: Quantité en stock
+          example: 5.0
+        job_id:
+          type: string
+          description: ID du travail associé à l'article
+          example: Z615939.01
+        item2:
+          type: string
+          description: 2e code associé à l'article
+          example: 9400 044 07105
+        description3:
+          type: string
+          description: Complément à la description de l'article
+          example: 4.4 300V A0B1C1D2.4 SKF-[0004P2]
+        um:
+          type: string
+          description: Unité de mesure
+          example: PC
+        tot_needed:
+          type: number
+          description: Quantité demandée
+          example: 6.0
+        tot_issued:
+          type: number
+          description: Quantité à prendre
+          example: 6.0
+        picked_qty:
+          type: number
+          description: Quantité ramassée
+          example: 10.0
+          nullable: true
+        picked_time:
+          type: string
+          format: date-time
+          description: Date/heure du ramassage
+          example: "Wed, 03 May 2023 17:28:26 GMT"
+          nullable: true
+        picking_order_id:
+          type: integer
+          description: ID du picking order
+          example: 1
+    PickingOrder:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: ID du picking
+          example: 1
+        status:
+          type: string
+          description: Statut du picking
+          enum: [not_started, started, finished]
+          example: not_started
+        order_items:
+          type: array
+          description: Articles de la commande
+          items:
+            $ref: '#/components/schemas/PickingItem'
