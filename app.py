@@ -139,7 +139,7 @@ def get_picking(order_id):
     if order:
         return jsonify(order.to_dict())
     else:
-        return "Order not found", 404
+        return "Le picking n'a pas pu être trouvé", 404
 
 
 @app.route("/api/picking/<int:order_id>", methods=["PUT"])
