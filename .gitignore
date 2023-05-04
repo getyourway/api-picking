@@ -8,5 +8,6 @@ venv
 # Mac files
 .DS_STORE
 
-# Local Database instance
-instance/
+# Local data
+instance/*.db
+keypad_local/*.csv
