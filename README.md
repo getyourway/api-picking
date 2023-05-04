@@ -206,3 +206,22 @@ Afin de s'assurer que les données du préparateur de commande et celle de la ba
 
 Cette API n'implique aucun système d'authentification. Il est important de protéger les données de picking des personnes extérieures à l'entreprise et une authentification basique ou JWT pourrait être une solution.
  
+## Utilisation du serveur local
+
+Pour tester l'API, un serveur local Flask a été mis en place.
+
+```console
+$ python app.py
+```
+
+Un client de test lié à ce serveur est également disponible.
+
+```console
+$ python app.py
+```
+
+N'oubliez pas d'installer les packages Python nécessaires à l'utilisation de ces scripts via
+
+```console
+$ pip install -r requirements.txt
+```
