@@ -201,3 +201,8 @@ Seuls les articles avec une valeur pour `picked_qty` sont mis à jour. De plus, 
 > Pour forcer la mise à jour sans prendre en compte la date stockée en base de données, la date doit être omise dans la requête de mise à jour. Le serveur s'occupera de mettre à jour la date sur base de l'heure à laquelle i la reçu la requête.
 
 Afin de s'assurer que les données du préparateur de commande et celle de la base de données sont les mêmes, l'ensemble des articles de la commande est renvoyé en réponse afin que le préparateur mette à jour ses données locales.
+
+## Limitations
+
+Cette API n'implique aucun système d'authentification. Il est important de protéger les données de picking des personnes extérieures à l'entreprise et une authentification basique ou JWT pourrait être une solution.
+ 
